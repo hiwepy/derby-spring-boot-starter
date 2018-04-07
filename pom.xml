@@ -433,6 +433,13 @@
 			<artifactId>spring-boot-autoconfigure</artifactId>
 		</dependency>
 		
+		<!-- SchemaCrawler For Apache Derby ：https://mvnrepository.com/artifact/us.fatehi/schemacrawler-derby -->
+		<dependency>
+		    <groupId>us.fatehi</groupId>
+		    <artifactId>schemacrawler-derby</artifactId>
+		    <version>14.03.03</version>
+		</dependency>
+		
 		<!-- JDBC Driver For Apache Derby -->
 		<!-- http://mvnrepository.com/artifact/org.apache.derby -->
 		<dependency>
