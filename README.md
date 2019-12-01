@@ -1,5 +1,5 @@
-# spring-boot-starter-derby
-derby
+# derby-spring-boot-starter
+Spring Boot Starter For Derby DB
 
 
 #下载
