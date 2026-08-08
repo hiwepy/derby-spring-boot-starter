@@ -48,7 +48,7 @@ import org.springframework.core.io.ResourceLoader;
  *   <li>{@code berkeley.db.catalog-database-name} — catalog database name (default {@code tt})</li>
  * </ul>
  *
- * @author hiwepy
+ * @author [@Loong Wan](https://github.com/loong10k)
  * @since 1.0.0
  */
 @Configuration

@@ -28,7 +28,7 @@ package org.apache.derby.spring.boot;
  * methods such as {@code writeToDatabase}, {@code readFromDatabase},
  * {@code deleteFromDatabase} and {@code getAllFromDatabase}.</p>
  *
- * @author hiwepy
+ * @author [@Loong Wan](https://github.com/loong10k)
  * @since 1.0.0
  */
 public class DerbyTemplate {

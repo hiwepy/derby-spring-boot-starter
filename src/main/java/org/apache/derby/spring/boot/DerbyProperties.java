@@ -36,7 +36,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *     catalog-database-name: catalog
  * }</pre>
  *
- * @author hiwepy
+ * @author [@Loong Wan](https://github.com/loong10k)
  * @since 1.0.0
  */
 @ConfigurationProperties(DerbyProperties.PREFIX)
