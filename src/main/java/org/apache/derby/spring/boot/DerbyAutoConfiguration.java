@@ -1,6 +1,19 @@
+/*
+ * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.derby.spring.boot;
-
-import java.io.IOException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,137 +21,75 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-
+/**
+ * Spring Boot auto-configuration for Berkeley DB / Derby embedded database integration.
+ * <p>
+ * Activates the embedded database environment only when the {@code berkeley.db.enabled}
+ * property is explicitly set to {@code true}, allowing applications to opt in to the
+ * Berkeley DB environment without forcing it on every Spring Boot application that
+ * happens to scan this package.
+ * </p>
+ * <p>
+ * The configuration binds the {@link DerbyProperties} POJO to the {@code berkeley.db.*}
+ * configuration namespace and implements {@link ResourceLoaderAware} so the Spring
+ * infrastructure can inject the application's resource loader for resolving file-based
+ * database configuration.
+ * </p>
+ *
+ * <h3>Configuration keys</h3>
+ * <ul>
+ *   <li>{@code berkeley.db.enabled} — opt-in switch (default {@code false})</li>
+ *   <li>{@code berkeley.db.home-dir} — root directory of the database environment</li>
+ *   <li>{@code berkeley.db.env-home} — environment home path</li>
+ *   <li>{@code berkeley.db.env-dir} — environment directory name (default {@code dbEnv})</li>
+ *   <li>{@code berkeley.db.database-name} — database name (default {@code tt})</li>
+ *   <li>{@code berkeley.db.catalog-database-name} — catalog database name (default {@code tt})</li>
+ * </ul>
+ *
+ * @author [@Loong Wan](https://github.com/loong10k)
+ * @since 1.0.0
+ */
 @Configuration
 @ConditionalOnProperty(prefix = DerbyProperties.PREFIX, value = "enabled", havingValue = "true")
 @EnableConfigurationProperties({ DerbyProperties.class })
-/**
- * @see https://blog.csdn.net/u012150792/article/details/53446205
- * Berkeley DB 是一个嵌入式数据库，它适合于管理海量的(256T)、简单的数据。
- * BDB是以键值对(value/key)来存储和管理数据库的。键可以重复，数据值可以是任意类型的。BDB的底层是用B+树或者其他算法实现的。
- */
 public class DerbyAutoConfiguration implements InitializingBean, ResourceLoaderAware {
-	
-	@Autowired
-	private DerbyProperties properties;
-	
-	private ResourceLoader resourceLoader;
-	
-	/*
-	//配置创建环境对象
-    public EnvironmentConfig configEnvironment(){
-    	
-    	EnvironmentConfig envConfig = new EnvironmentConfig();
-        envConfig.setAllowCreate(properties.getAllowCreate());//如果设置了true则表示当数据库环境不存在时候重新创建一个数据库环境，默认为false.
-        envConfig.setTransactional(properties.getTransactional());//事务支持,如果为true，则表示当前环境支持事务处理，默认为false，不支持事务处理。
-        envConfig.setReadOnly(properties.getReadOnly());//是否以只读方式打开，默认为false.
-        envConfig.setCachePercent(50);//设置当前环境能够使用的RAM占整个JVM百分比
-        envConfig.setCacheSize(102400);//设置当前环境能使用的最大RAM,单位为byte
 
-        return envConfig;
-    }
-    
-    public RepConfigProxy repConfigProxy(){
-    	return new ReplicationConfig();
-    }
-    
-    //创建Environment
-    public Environment environment(ReplicationConfig repConfig,EnvironmentConfig envConfig, RepConfigProxy repConfigProxy) throws DatabaseException, IOException{
-        
-    	Resource resource = resourceLoader.getResource(properties.getEnvHome());
-    	
-    	RepInternal.createInternalEnvHandle(resource.getFile(), repConfig, envConfig);
-    	
-    	RepInternal.createDetachedEnv(resource.getFile(), repConfig, envConfig);
-    	
-        Environment myDbEnvironment = new Environment(resource.getFile(), envConfig);
-        
-        return myDbEnvironment;
-        
-    }
-    
-    protected StoredClassCatalog catalog;//catalog
-    protected Database database;//database
-    private static final String CLASS_CATALOG="java_class_catalog";//数据库名
-    protected Database catalogDatabase;//catalog存放处
-    
-    
-   
-    
-   
-    public Database catalogDatabase(Environment myDbEnvironment){
-    	
-    	//配置创建完环境对象后，可以用它创建数据库
-    	DatabaseConfig catalogDBConfig = properties.clone();
-        catalogDBConfig.setAllowCreate(true);//如果设置了true则表示当数据库不存在时候重新创建一个数据库，默认为false.
-        catalogDBConfig.setTransactional(true);//事务支持,如果为true，则表示当前数据库支持事务处理，默认为false，不支持事务处理。
-        
-        
-        dbConfig.setBtreeComparator();//设置用于Btree比较的比较器，通常是用来排序  
-        dbConfig.setDuplicateComparator();//设置用来比较一个key有两个不同值的时候的大小比较器。
-        dbConfig.setSortedDuplicates(true);//设置一个key是否允许存储多个值，true代表允许，默认false. 
-        dbConfig.setExclusiveCreate(true);//以独占的方式打开，也就是说同一个时间只能有一实例打开这个database。
-        
-        
-        Database catalogDatabase = myDbEnvironment.openDatabase(null, properties.getCatalogDatabaseName(), properties);
+    /**
+     * Bound configuration properties; injected by Spring Boot's
+     * {@code @EnableConfigurationProperties} mechanism.
+     */
+    @Autowired
+    private DerbyProperties properties;
 
-        System.out.println(catalogDatabase.getDatabaseName());
-        
-        return catalogDatabase;
-        
-    }
-    
-    // Open Catalog
-    public StoredClassCatalog catalog(){
-    	return new StoredClassCatalog(catalogDatabase);
-    }
-    
+    /**
+     * Spring {@link ResourceLoader} provided by the application context.
+     * <p>Set by the framework during context refresh.</p>
+     */
+    private ResourceLoader resourceLoader;
 
-    //Open Database
-    public Database berkeleyDatabase(Environment myDbEnvironment){
-    	
-    	//配置创建完环境对象后，可以用它创建数据库
-    	DatabaseConfig dbConfig = properties.clone();
-        dbConfig.setAllowCreate(true);//如果设置了true则表示当数据库不存在时候重新创建一个数据库，默认为false.
-        dbConfig.setTransactional(true);//事务支持,如果为true，则表示当前数据库支持事务处理，默认为false，不支持事务处理。
-        dbConfig.setReadOnly(false);//是否以只读方式打开，默认为false.
-    	
-        
-        dbConfig.setBtreeComparator();//设置用于Btree比较的比较器，通常是用来排序  
-        dbConfig.setDuplicateComparator();//设置用来比较一个key有两个不同值的时候的大小比较器。
-        dbConfig.setSortedDuplicates(true);//设置一个key是否允许存储多个值，true代表允许，默认false.
-        dbConfig.setExclusiveCreate(true);//以独占的方式打开，也就是说同一个时间只能有一实例打开这个database。
-        
-        
-        Database myDatabase = myDbEnvironment.openDatabase(null, properties.getDatabaseName(), dbConfig);
-
-        System.out.println(myDatabase.getDatabaseName());
-        
-        return myDatabase;
-        
+    /**
+     * Lifecycle hook invoked by Spring after all properties have been set.
+     * <p>The current implementation is a no-op placeholder; future versions may
+     * register the {@link hooks.DerbyShutdownHook} here to ensure clean shutdown
+     * of the Berkeley DB environment when the JVM terminates.</p>
+     *
+     * @throws Exception if any startup task fails (currently never thrown)
+     */
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // Placeholder for future startup wiring (e.g. shutdown hook registration).
     }
-	
-    Database myDatabase;
-    Environment myDbEnvironment;*/
-    
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		
-		/**
-		 * 应用退出时，要调用shutdown来清理资源，关闭网络连接，从MetaQ服务器上注销自己
-		 * 注意：我们建议应用在JBOSS、Tomcat等容器的退出钩子里调用shutdown方法
-		
-		Runtime.getRuntime().addShutdownHook(new DerbyShutdownHook(myDatabase, catalog, myDbEnvironment));
-       */  
-		
-	}
 
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
-	
+    /**
+     * Stores the {@link ResourceLoader} provided by the Spring application context.
+     *
+     * @param resourceLoader the resource loader to use for resolving classpath and
+     *                       filesystem resources (database configuration files, etc.)
+     */
+    @Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 }

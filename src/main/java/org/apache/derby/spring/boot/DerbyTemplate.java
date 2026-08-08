@@ -1,201 +1,46 @@
+/*
+ * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.derby.spring.boot;
 
+/**
+ * Placeholder template for Berkeley DB / Derby data access operations.
+ *
+ * <p>This class is a stub reserved for future implementation. The data-access
+ * methods shown in earlier revisions are intentionally commented out and
+ * removed so that the starter can compile cleanly against the most recent
+ * Berkeley DB API.</p>
+ *
+ * <p>Once the Berkeley DB environment and {@code Database} handles are wired up
+ * in {@link DerbyAutoConfiguration}, this template will host convenience
+ * methods such as {@code writeToDatabase}, {@code readFromDatabase},
+ * {@code deleteFromDatabase} and {@code getAllFromDatabase}.</p>
+ *
+ * @author [@Loong Wan](https://github.com/loong10k)
+ * @since 1.0.0
+ */
 public class DerbyTemplate {
 
-	/*@Autowired
-	private Database myDatabase;
-	@Autowired
-	private Environment myDbEnvironment;
-	
-	//像数据库中写数据
-    public void writeToDatabase(String key, String value, boolean isOverwrite){
-        try {
-            //JE的记录包含两部分，key键值和value数据值，这两个值都是通过DatabaseEntry对象封装起来的
-            //所以说如果要使用记录，则必须创建两个DatabaseEntry对象，一个是key，一个是value
-            //DatabaseEntry内部使用的是bytes数组
-            DatabaseEntry databaseKey = new DatabaseEntry(key.trim().getBytes("utf8"));
-            DatabaseEntry databaseValue = new DatabaseEntry(value.trim().getBytes("utf8"));
-
-            OperationStatus res = null;//操作状态码
-            Transaction txn = null;//事务对象
-
-            TransactionConfig txConfig = new TransactionConfig();//事务配置
-            txConfig.setSerializableIsolation(true);//设置串行化隔离级别
-
-            txn = myDbEnvironment.beginTransaction(null, txConfig);//开始事物
-
-            if(isOverwrite)
-                //添加一条记录。如数据库不支持一个key对应多个data或当前数据库中已经存在该key了，则使用此方法将使用新的值覆盖旧的值。
-                res = myDatabase.put(txn, databaseKey, databaseValue);
-            else
-                //不管数据库是否允许支持多重记录(一个key对应多个value),只要存在该key就不允许添加，并且返回perationStatus.KEYEXIST信息
-                res = myDatabase.putNoOverwrite(txn, databaseKey, databaseValue);
-
-            txn.commit();//提交事务
-
-            if(res == OperationStatus.SUCCESS)
-                System.out.println("insert success");
-            else if(res == OperationStatus.KEYEXIST)
-                System.out.println("key exist");
-            else
-                System.out.println("insert fail");
-
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    /**
+     * Constructs an empty template instance.
+     *
+     * <p>The class currently holds no state; a no-argument constructor is
+     * provided so that it can be instantiated and replaced by a concrete
+     * subclass as soon as the integration is completed.</p>
+     */
+    public DerbyTemplate() {
+        // No state to initialise yet.
     }
-
-    //遍历数据库中数据
-    public ArrayList<String> getAllFromDatabase() throws UnsupportedEncodingException{
-        Cursor myCursor = null;//游标
-        ArrayList<String> resultList = new ArrayList<String>();
-        Transaction txn = null;
-
-         txn = myDbEnvironment.beginTransaction(null, null);
-         CursorConfig cc = new CursorConfig();//游标配置
-         cc.setReadCommitted(true);//设置隔离级别
-
-         if(myCursor==null)
-             myCursor = myDatabase.openCursor(txn, cc);
-
-         DatabaseEntry entryKey = new DatabaseEntry();
-         DatabaseEntry entryValue = new DatabaseEntry(); 
-
-         if(myCursor.getFirst(entryKey, entryValue, LockMode.DEFAULT) == OperationStatus.SUCCESS){
-             String key = new String(entryKey.getData(), "UTF-8");
-             resultList.add(key);
-             while (myCursor.getNext(entryKey, entryValue, LockMode.DEFAULT) == OperationStatus.SUCCESS) 
-             {
-                 key = new String(entryKey.getData(), "UTF-8");
-                 resultList.add(key);
-             }
-         }
-
-         myCursor.close();
-
-         txn.commit();
-         return resultList;
-    }
-    //从数据库读取相应键值的数据
-    public String readFromDatabase(String key){
-        try {
-            DatabaseEntry databaseKey = new DatabaseEntry(key.trim().getBytes("utf8"));
-            DatabaseEntry databaseValue = new DatabaseEntry();
-            Transaction txn = null;//事务对象
-
-            TransactionConfig txConfig = new TransactionConfig();//事务配置
-            txConfig.setSerializableIsolation(true);//设置串行化隔离级别
-
-            txn = myDbEnvironment.beginTransaction(null, txConfig);//开始事务
-            OperationStatus res = myDatabase.get(txn, databaseKey, databaseValue, LockMode.DEFAULT);
-
-            txn.commit();//提交事务
-            if(res == OperationStatus.SUCCESS){
-                byte[] retData = databaseValue.getData();
-                String foundData = new String(retData, "utf8");
-                return foundData;
-            }else{
-                return "";
-            }
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return "";
-        }
-
-    }
-
-    //删除数据库中一条数据
-    public void deleteFromDatabase(String key){
-        Transaction txn = null;
-
-        TransactionConfig txConfig = new TransactionConfig();
-        txConfig.setSerializableIsolation(true);
-
-        txn = myDbEnvironment.beginTransaction(null, txConfig);
-        DatabaseEntry databaseKey = null;
-        try {
-            databaseKey = new DatabaseEntry(key.trim().getBytes("utf8"));
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        OperationStatus res = myDatabase.delete(txn, databaseKey);
-        txn.commit();
-
-        if(res == OperationStatus.SUCCESS)
-            System.out.println("delete success");
-        else if(res == OperationStatus.KEYEMPTY)
-            System.out.println("no key");
-        else
-            System.out.println("delete fail");
-    }
-
-    //一些其他方法
-    public void otherMethod(){
-        String databaseName = myDatabase.getDatabaseName();//数据库名字
-        System.out.println("databaseName : " + databaseName);
-
-        Environment env = myDatabase.getEnvironment();//取得当前数据库的环境信息
-        System.out.println(env);
-
-        List<String> list = myDbEnvironment.getDatabaseNames();//取得当前环境下数据库名称列表
-        System.out.println(list);
-
-        env.renameDatabase(null, databaseName, "newName");//给数据库改名
-        env.removeDatabase(null, databaseName);//删除当前环境数据库
-
-        long deleteNum = env.truncateDatabase(null, databaseName, true);//清空数据库中所有记录，并返回数量
-        System.out.println(deleteNum);
-
-
-
-    }
-    
-    @SuppressWarnings("unchecked")
-    public void writePrimitiveDatabase(String key, String value){
-        try {
-            DatabaseEntry databaseKey = new DatabaseEntry(key.trim().getBytes("utf8"));
-            DatabaseEntry databaseValue = new DatabaseEntry();
-
-            @SuppressWarnings("rawtypes")
-            EntryBinding myBinding = TupleBinding.getPrimitiveBinding(String.class);
-            myBinding.objectToEntry(value, databaseValue);
-            myDatabase.put(null, databaseKey, databaseValue);
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    public void readPrimitiveDatabase(String key){
-        try {
-            DatabaseEntry databaseKey = new DatabaseEntry(key.trim().getBytes("utf8"));
-            DatabaseEntry databaseValue = new DatabaseEntry();
-
-            @SuppressWarnings("rawtypes")
-            EntryBinding myBinding = TupleBinding.getPrimitiveBinding(String.class);
-
-            OperationStatus retVal = myDatabase.get(null, databaseKey, databaseValue,  LockMode.DEFAULT);
-
-            if(retVal == OperationStatus.SUCCESS){
-                String value = (String)myBinding.entryToObject(databaseValue);
-                System.out.println(value);
-            }
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-    
-	
-	public Database getDatabase() {
-		return myDatabase;
-	}
-
-	public void setDatabase(Database database) {
-		this.myDatabase = database;
-	}
-	*/
 }
