@@ -48,7 +48,7 @@ import org.springframework.core.io.ResourceLoader;
  *   <li>{@code berkeley.db.catalog-database-name} — catalog database name (default {@code tt})</li>
  * </ul>
  *
- * @author [@Loong Wan](https://github.com/loong10k)
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
  * @since 1.0.0
  */
 @Configuration
