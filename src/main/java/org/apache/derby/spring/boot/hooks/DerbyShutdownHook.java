@@ -30,7 +30,7 @@ import org.springframework.core.env.Environment;
  * shutdown logic will be added when the full Berkeley DB integration is wired up
  * in {@link org.apache.derby.spring.boot.DerbyAutoConfiguration}.</p>
  *
- * @author [@Loong Wan](https://github.com/loong10k)
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
  * @since 1.0.0
  */
 public class DerbyShutdownHook extends Thread {
