@@ -65,6 +65,9 @@ public class DerbyShutdownHook extends Thread {
      * correct order to avoid {@code DatabaseException}s.</p>
      */
     @Override
+    /**
+     * <p>Run.</p>
+     */
     public void run() {
         // No-op placeholder for future shutdown logic.
     }

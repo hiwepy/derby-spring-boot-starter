@@ -54,6 +54,11 @@ import org.springframework.core.io.ResourceLoader;
 @Configuration
 @ConditionalOnProperty(prefix = DerbyProperties.PREFIX, value = "enabled", havingValue = "true")
 @EnableConfigurationProperties({ DerbyProperties.class })
+/**
+ * <p>Auto-configuration for DerbyAutoConfiguration.</p>
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 1.0.0
+ */
 public class DerbyAutoConfiguration implements InitializingBean, ResourceLoaderAware {
 
     /**
@@ -78,6 +83,9 @@ public class DerbyAutoConfiguration implements InitializingBean, ResourceLoaderA
      * @throws Exception if any startup task fails (currently never thrown)
      */
     @Override
+    /**
+     * <p>After properties set.</p>
+     */
     public void afterPropertiesSet() throws Exception {
         // Placeholder for future startup wiring (e.g. shutdown hook registration).
     }
@@ -89,6 +97,7 @@ public class DerbyAutoConfiguration implements InitializingBean, ResourceLoaderA
      *                       filesystem resources (database configuration files, etc.)
      */
     @Override
+    /** @param resourceLoader set the resource loader. */
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
